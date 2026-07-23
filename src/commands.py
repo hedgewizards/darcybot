@@ -5,11 +5,30 @@ from interactions import (
     OptionType,
     Permissions
 )
+from src.helpers import format_channel
 
 from src import database
 
 
 class Commands(Extension):
+
+    @slash_command(
+        name="display-current-settings",
+        description="Display the current server settings",
+        default_member_permissions=Permissions.ADMINISTRATOR
+    )
+
+    async def display_current_settings(self, ctx):
+        settings = database.get_server(ctx.guild_id)
+
+        await ctx.send(
+            f"**Current Server Settings**\n"
+            f"Leaderboard Channel: {format_channel(settings['leaderboard_channel_id'])}\n"
+            f"Highlights Channel: {format_channel(settings['highlights_channel_id'])}\n"
+            f"Positive Vote: {settings['vote_positive_emote']}\n"
+            f"Negative Vote: {settings['vote_negative_emote']}\n"
+            f"Highlights Threshold: {settings['highlights_threshold']}"
+        )
 
     @slash_command(
         name="set-leaderboard",
@@ -136,3 +155,10 @@ class Commands(Extension):
         await ctx.send(
             "Highlights channel cleared."
         )
+
+
+def format_channel(channel_id):
+    if channel_id is None:
+        return "None"
+
+    return f"<#{channel_id}>"

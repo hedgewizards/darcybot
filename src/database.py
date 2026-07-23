@@ -95,6 +95,35 @@ def add_server(server_id):
             "🟥",
             1
         ))
+
+def get_server(server_id):
+    with get_connection() as connection:
+        cursor = connection.execute("""
+            SELECT
+                server_id,
+                leaderboard_channel_id,
+                highlights_channel_id,
+                vote_positive_emote,
+                vote_negative_emote,
+                highlights_threshold
+            FROM Servers
+            WHERE server_id = ?
+        """, (server_id,))
+
+        row = cursor.fetchone()
+
+        if row is None:
+            return None
+
+        return {
+            "server_id": row[0],
+            "leaderboard_channel_id": row[1],
+            "highlights_channel_id": row[2],
+            "vote_positive_emote": row[3],
+            "vote_negative_emote": row[4],
+            "highlights_threshold": row[5],
+        }
+
 def set_leaderboard_channel(server_id, channel_id):
     with get_connection() as connection:
         connection.execute("""
