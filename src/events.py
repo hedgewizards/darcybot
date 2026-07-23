@@ -21,14 +21,14 @@ class Events(interactions.Extension):
 
     @interactions.listen(events.MessageReactionAdd)
     async def on_reaction_add(self, event):
-        server_settings = database.get_server(event.message.guild.id)
+        guild_settings = database.get_server(event.message.guild.id)
 
-        if server_settings is None:
+        if guild_settings is None:
             return
 
         received_emote = str(event.emoji)
-        positive_emote = server_settings["vote_positive_emote"]
-        negative_emote = server_settings["vote_negative_emote"]
+        positive_emote = guild_settings["vote_positive_emote"]
+        negative_emote = guild_settings["vote_negative_emote"]
 
         if received_emote == positive_emote:
             database.add_vote(
@@ -39,7 +39,7 @@ class Events(interactions.Extension):
                 1
             )
 
-            await process_positive_vote(event.message, server_settings)
+            await process_positive_vote(self.bot, event.message, guild_settings)
 
             print(
                 f"Positive vote: message={event.message.id}, "

@@ -2,16 +2,16 @@ from src import database
 from src.webhookmessages import send_webhook_message
 
 
-async def process_positive_vote(message, server_settings):
+async def process_positive_vote(bot, message, guild_settings):
     score = get_message_score(message.id)
 
-    if score < server_settings["highlights_threshold"]:
+    if score < guild_settings["highlights_threshold"]:
         return
 
     if database.is_message_highlighted(message.id):
         return
 
-    highlights_channel_id = server_settings["highlights_channel_id"]
+    highlights_channel_id = guild_settings["highlights_channel_id"]
 
     if highlights_channel_id is None:
         return
@@ -21,8 +21,10 @@ async def process_positive_vote(message, server_settings):
     )
 
     await send_webhook_message(
+        bot,
         highlights_channel,
-        message
+        message,
+        guild_settings
     )
 
     database.add_highlighted_message(message.id)

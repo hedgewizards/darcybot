@@ -35,7 +35,8 @@ def initialize():
         connection.execute("""
             CREATE TABLE IF NOT EXISTS HighlightedMessages (
                 server_id INTEGER NOT NULL,
-                message_id INTEGER PRIMARY KEY
+                message_id INTEGER PRIMARY KEY,
+                webhook_message_id INTEGER
             )
         """)
 
