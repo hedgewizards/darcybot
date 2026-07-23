@@ -1,6 +1,6 @@
 import interactions
 from interactions.api import events
-from src.highlights import process_positive_vote
+from src.highlights import process_positive_vote, process_any_vote
 
 from src import database
 
@@ -57,6 +57,8 @@ class Events(interactions.Extension):
                 -1
             )
 
+            await process_any_vote(self.bot, event.message, guild_settings)
+
             print(
                 f"Negative vote: message={event.message.id}, "
                 f"voter={event.author.id}, "
@@ -76,14 +78,14 @@ class Events(interactions.Extension):
 
     @interactions.listen(events.MessageReactionRemove)
     async def on_reaction_remove(self, event):
-        settings = database.get_server(event.message.guild.id)
+        guild_settings = database.get_server(event.message.guild.id)
 
-        if settings is None:
+        if guild_settings is None:
             return
 
         received_emote = str(event.emoji)
 
-        if received_emote == settings["vote_positive_emote"]:
+        if received_emote == guild_settings["vote_positive_emote"]:
             database.remove_vote(
                 event.message.id,
                 event.author.id,
@@ -95,7 +97,7 @@ class Events(interactions.Extension):
                 f"voter={event.author.id}"
             )
 
-        elif received_emote == settings["vote_negative_emote"]:
+        elif received_emote == guild_settings["vote_negative_emote"]:
             database.remove_vote(
                 event.message.id,
                 event.author.id,
@@ -106,3 +108,5 @@ class Events(interactions.Extension):
                 f"Removed negative vote: message={event.message.id}, "
                 f"voter={event.author.id}"
             )
+        
+        await process_any_vote(self.bot, event.message, guild_settings)

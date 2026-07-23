@@ -210,15 +210,26 @@ def remove_vote(message_id, voter_id, score):
             score
         ))
 
-def add_highlighted_message(message_id):
+def add_highlighted_message(server_id, message_id, webhook_message_id):
     with get_connection() as connection:
         connection.execute("""
             INSERT OR IGNORE INTO HighlightedMessages (
-                message_id
+                server_id, message_id, webhook_message_id
             )
-            VALUES (?)
+            VALUES (?, ?, ?)
+        """, (server_id, message_id, webhook_message_id,))
+
+# returns the bot webhook message for an associated highlight
+def get_message_highlight(message_id):
+    with get_connection() as connection:
+        cursor = connection.execute("""
+            SELECT webhook_message_id
+            FROM HighlightedMessages
+            WHERE message_id = ?
         """, (message_id,))
 
+        row = cursor.fetchone()
+        return row[0] if row else None
 
 def is_message_highlighted(message_id):
     with get_connection() as connection:
