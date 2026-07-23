@@ -159,3 +159,35 @@ def set_highlights_threshold(server_id, threshold):
             SET highlights_threshold = ?
             WHERE server_id = ?
         """, (threshold, server_id))
+
+def add_vote(server_id, message_id, target_user_id, voter_id, score):
+    with get_connection() as connection:
+        connection.execute("""
+            INSERT OR REPLACE INTO Votes (
+                server_id,
+                message_id,
+                target_user_id,
+                voter_id,
+                score
+            )
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            server_id,
+            message_id,
+            target_user_id,
+            voter_id,
+            score
+        ))
+
+def remove_vote(message_id, voter_id, score):
+    with get_connection() as connection:
+        connection.execute("""
+            DELETE FROM Votes
+            WHERE message_id = ?
+              AND voter_id = ?
+              AND score = ?
+        """, (
+            message_id,
+            voter_id,
+            score
+        ))
