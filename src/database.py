@@ -32,6 +32,13 @@ def initialize():
             )
         """)
 
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS HighlightedMessages (
+                server_id INTEGER NOT NULL,
+                message_id INTEGER PRIMARY KEY
+            )
+        """)
+
 
 def add_vote(server_id, message_id, target_user_id, voter_id, score):
     with get_connection() as connection:
@@ -160,6 +167,16 @@ def set_highlights_threshold(server_id, threshold):
             WHERE server_id = ?
         """, (threshold, server_id))
 
+def get_votes_for_message(message_id):
+    with get_connection() as connection:
+        cursor = connection.execute("""
+            SELECT score
+            FROM Votes
+            WHERE message_id = ?
+        """, (message_id,))
+
+        return cursor.fetchall()
+
 def add_vote(server_id, message_id, target_user_id, voter_id, score):
     with get_connection() as connection:
         connection.execute("""
@@ -191,3 +208,23 @@ def remove_vote(message_id, voter_id, score):
             voter_id,
             score
         ))
+
+def add_highlighted_message(message_id):
+    with get_connection() as connection:
+        connection.execute("""
+            INSERT OR IGNORE INTO HighlightedMessages (
+                message_id
+            )
+            VALUES (?)
+        """, (message_id,))
+
+
+def is_message_highlighted(message_id):
+    with get_connection() as connection:
+        cursor = connection.execute("""
+            SELECT 1
+            FROM HighlightedMessages
+            WHERE message_id = ?
+        """, (message_id,))
+
+        return cursor.fetchone() is not None

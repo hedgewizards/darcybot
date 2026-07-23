@@ -1,5 +1,6 @@
 import interactions
 from interactions.api import events
+from src.highlights import process_positive_vote
 
 from src import database
 
@@ -17,17 +18,17 @@ class Events(interactions.Extension):
     @interactions.listen(events.GuildJoin)
     async def on_guild_join(self, event):
         database.add_server(event.guild.id)
-        
+
     @interactions.listen(events.MessageReactionAdd)
     async def on_reaction_add(self, event):
-        settings = database.get_server(event.message.guild.id)
+        server_settings = database.get_server(event.message.guild.id)
 
-        if settings is None:
+        if server_settings is None:
             return
 
         received_emote = str(event.emoji)
-        positive_emote = settings["vote_positive_emote"]
-        negative_emote = settings["vote_negative_emote"]
+        positive_emote = server_settings["vote_positive_emote"]
+        negative_emote = server_settings["vote_negative_emote"]
 
         if received_emote == positive_emote:
             database.add_vote(
@@ -37,6 +38,8 @@ class Events(interactions.Extension):
                 event.author.id,
                 1
             )
+
+            await process_positive_vote(event.message, server_settings)
 
             print(
                 f"Positive vote: message={event.message.id}, "
