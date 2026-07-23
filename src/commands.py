@@ -1,108 +1,138 @@
-import discord
-from discord import app_commands
+from interactions import (
+    Extension,
+    slash_command,
+    slash_option,
+    OptionType,
+    Permissions
+)
 
 from src import database
 
 
-def setup_commands(bot):
+class Commands(Extension):
 
-    @bot.tree.command(name="set-leaderboard")
-    @app_commands.describe(
-        channel="The channel where the leaderboard will be displayed"
+    @slash_command(
+        name="set-leaderboard",
+        description="Set the leaderboard channel",
+        default_member_permissions=Permissions.ADMINISTRATOR
     )
-    async def set_leaderboard(
-        interaction: discord.Interaction,
-        channel: discord.TextChannel
-    ):
+    @slash_option(
+        name="channel",
+        description="The channel where the leaderboard will be displayed",
+        opt_type=OptionType.CHANNEL,
+        required=True
+    )
+    async def set_leaderboard(self, ctx, channel):
         database.set_leaderboard_channel(
-            interaction.guild_id,
+            ctx.guild_id,
             channel.id
         )
 
-        await interaction.response.send_message(
+        await ctx.send(
             f"Leaderboard channel set to {channel.mention}."
         )
 
 
-    @bot.tree.command(name="set-highlights")
-    @app_commands.describe(
-        channel="The channel where highlights will be posted"
+    @slash_command(
+        name="set-highlights",
+        description="Set the highlights channel",
+        default_member_permissions=Permissions.ADMINISTRATOR
     )
-    async def set_highlights(
-        interaction: discord.Interaction,
-        channel: discord.TextChannel
-    ):
+    @slash_option(
+        name="channel",
+        description="The channel where highlights will be posted",
+        opt_type=OptionType.CHANNEL,
+        required=True
+    )
+    async def set_highlights(self, ctx, channel):
         database.set_highlights_channel(
-            interaction.guild_id,
+            ctx.guild_id,
             channel.id
         )
 
-        await interaction.response.send_message(
+        await ctx.send(
             f"Highlights channel set to {channel.mention}."
         )
 
 
-    @bot.tree.command(name="set-vote-emotes")
-    @app_commands.describe(
-        positive="The positive vote emoji",
-        negative="The negative vote emoji"
+    @slash_command(
+        name="set-vote-emotes",
+        description="Set the positive and negative vote emotes",
+        default_member_permissions=Permissions.ADMINISTRATOR
     )
-    async def set_emotes(
-        interaction: discord.Interaction,
-        positive: str,
-        negative: str
-    ):
+    @slash_option(
+        name="positive",
+        description="The positive vote emoji",
+        opt_type=OptionType.STRING,
+        required=True
+    )
+    @slash_option(
+        name="negative",
+        description="The negative vote emoji",
+        opt_type=OptionType.STRING,
+        required=True
+    )
+    async def set_emotes(self, ctx, positive, negative):
         database.set_vote_emotes(
-            interaction.guild_id,
+            ctx.guild_id,
             positive,
             negative
         )
 
-        await interaction.response.send_message(
+        await ctx.send(
             f"Vote emotes set to {positive} and {negative}."
         )
 
 
-    @bot.tree.command(name="set-highlights-threshold")
-    @app_commands.describe(
-        threshold="The minimum score required for a highlight"
+    @slash_command(
+        name="set-highlights-threshold",
+        description="Set the minimum score required for a highlight",
+        default_member_permissions=Permissions.ADMINISTRATOR
     )
-    async def set_threshold(
-        interaction: discord.Interaction,
-        threshold: int
-    ):
+    @slash_option(
+        name="threshold",
+        description="The minimum score required for a highlight",
+        opt_type=OptionType.INTEGER,
+        required=True
+    )
+    async def set_threshold(self, ctx, threshold):
         database.set_highlights_threshold(
-            interaction.guild_id,
+            ctx.guild_id,
             threshold
         )
 
-        await interaction.response.send_message(
+        await ctx.send(
             f"Highlights threshold set to {threshold}."
         )
-    
-    @bot.tree.command(name="clear-leaderboard")
-    async def clear_leaderboard(
-        interaction: discord.Interaction
-    ):
+
+
+    @slash_command(
+        name="clear-leaderboard",
+        description="Stop updating the leaderboards channel",
+        default_member_permissions=Permissions.ADMINISTRATOR
+    )
+    async def clear_leaderboard(self, ctx):
         database.set_leaderboard_channel(
-            interaction.guild_id,
+            ctx.guild_id,
             None
         )
 
-        await interaction.response.send_message(
+        await ctx.send(
             "Leaderboard channel cleared."
         )
 
 
-    @bot.tree.command(name="clear-highlights")
-    async def clear_highlights(
-        interaction: discord.Interaction
-    ):
+    @slash_command(
+        name="clear-highlights",
+        description="Stop displaying highlights",
+        default_member_permissions=Permissions.ADMINISTRATOR
+    )
+    async def clear_highlights(self, ctx):
         database.set_highlights_channel(
-            interaction.guild_id,
+            ctx.guild_id,
             None
         )
 
-        await interaction.response.send_message(
+        await ctx.send(
             "Highlights channel cleared."
         )

@@ -7,4 +7,4 @@ cd /darcy/
 python3 -m venv .venv
 source .venv/bin/activate
 
-pip install -U discord.py python-dotenv
+pip install -U discord.py python-dotenv discord-py-interactions

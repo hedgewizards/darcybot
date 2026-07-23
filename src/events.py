@@ -1,21 +1,18 @@
+import interactions
+
 from src import database
 
 
-def setup_events(bot, debug_mode):
+class Events(interactions.Extension):
 
-    @bot.event
-    async def on_ready():
-        print(f"Logged in as {bot.user}")
+    @interactions.listen()
+    async def on_startup(self):
+        print(f"Logged in as {self.bot.user}")
 
-        for guild in bot.guilds:
+        for guild in self.bot.guilds:
             database.add_server(guild.id)
-            if debug_mode:
-                await bot.tree.sync(guild=guild)
 
 
-        await bot.tree.sync()
-
-
-    @bot.event
-    async def on_guild_join(guild):
-        database.add_server(guild.id)
+    @interactions.listen()
+    async def on_guild_join(self, event):
+        database.add_server(event.guild.id)
