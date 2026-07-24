@@ -26,7 +26,7 @@ class Events(interactions.Extension):
         if guild_settings is None:
             return
 
-        if event.message.Id == event.message.author.id:
+        if event.message.id == event.message.author.id:
             return
 
         received_emote = str(event.emoji)
