@@ -27,6 +27,7 @@ class Commands(Extension):
             f"Highlights Channel: {format_channel(settings['highlights_channel_id'])}\n"
             f"Positive Vote: {settings['vote_positive_emote']}\n"
             f"Negative Vote: {settings['vote_negative_emote']}\n"
+            f"Leaderboard Size: {settings['leaderboard_size']}\n"
             f"Highlights Threshold: {settings['highlights_threshold']}"
         )
 
@@ -122,6 +123,27 @@ class Commands(Extension):
 
         await ctx.send(
             f"Highlights threshold set to {threshold}."
+        )
+
+    @slash_command(
+    name="set-leaderboard-size",
+    description="Set the number of users shown on the leaderboard",
+    default_member_permissions=Permissions.ADMINISTRATOR
+)
+    @slash_option(
+        name="size",
+        description="The number of users shown on the leaderboard",
+        opt_type=OptionType.INTEGER,
+        required=True
+    )
+    async def set_leaderboard_size(self, ctx, size):
+        database.set_leaderboard_size(
+            ctx.guild_id,
+            size
+        )
+
+        await ctx.send(
+            f"Leaderboard size set to {size}."
         )
 
 

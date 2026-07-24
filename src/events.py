@@ -3,7 +3,7 @@ from interactions.api import events
 from src.highlights import process_positive_vote, process_any_vote
 
 from src import database
-
+from src import leaderboard
 
 class Events(interactions.Extension):
 
@@ -41,6 +41,11 @@ class Events(interactions.Extension):
 
             await process_positive_vote(self.bot, event.message, guild_settings)
 
+            leaderboard.trigger_update_leaderboard(
+                self.bot,
+                event.message.guild
+            )
+
             print(
                 f"Positive vote: message={event.message.id}, "
                 f"voter={event.author.id}, "
@@ -58,6 +63,11 @@ class Events(interactions.Extension):
             )
 
             await process_any_vote(self.bot, event.message, guild_settings)
+
+            leaderboard.trigger_update_leaderboard(
+                self.bot,
+                event.message.guild
+            )
 
             print(
                 f"Negative vote: message={event.message.id}, "

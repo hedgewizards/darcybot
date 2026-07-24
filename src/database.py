@@ -26,9 +26,11 @@ def initialize():
                 server_id INTEGER PRIMARY KEY,
                 leaderboard_channel_id INTEGER,
                 highlights_channel_id INTEGER,
+                leaderboard_message_id INTEGER,
                 vote_positive_emote TEXT NOT NULL,
                 vote_negative_emote TEXT NOT NULL,
-                highlights_threshold INTEGER NOT NULL DEFAULT 1
+                highlights_threshold INTEGER NOT NULL DEFAULT 1,
+                leaderboard_size INTEGER NOT NULL DEFAULT 10
             )
         """)
 
@@ -38,6 +40,10 @@ def initialize():
                 message_id INTEGER PRIMARY KEY,
                 webhook_message_id INTEGER
             )
+        """)
+        connection.execute("""
+            CREATE INDEX IF NOT EXISTS idx_votes_user_id
+                ON Votes(target_user_id, server_id, score);
         """)
 
 
@@ -110,10 +116,12 @@ def get_server(server_id):
             SELECT
                 server_id,
                 leaderboard_channel_id,
+                leaderboard_message_id,
                 highlights_channel_id,
                 vote_positive_emote,
                 vote_negative_emote,
-                highlights_threshold
+                highlights_threshold,
+                leaderboard_size
             FROM Servers
             WHERE server_id = ?
         """, (server_id,))
@@ -126,10 +134,12 @@ def get_server(server_id):
         return {
             "server_id": row[0],
             "leaderboard_channel_id": row[1],
-            "highlights_channel_id": row[2],
-            "vote_positive_emote": row[3],
-            "vote_negative_emote": row[4],
-            "highlights_threshold": row[5],
+            "leaderboard_message_id": row[2],
+            "highlights_channel_id": row[3],
+            "vote_positive_emote": row[4],
+            "vote_negative_emote": row[5],
+            "highlights_threshold": row[6],
+            "leaderboard_size": row[7]
         }
 
 def set_leaderboard_channel(server_id, channel_id):
@@ -240,3 +250,56 @@ def is_message_highlighted(message_id):
         """, (message_id,))
 
         return cursor.fetchone() is not None
+    
+def get_user_vote_count(
+    server_id,
+    target_user_id,
+    score
+):
+    with get_connection() as connection:
+        cursor = connection.execute("""
+            SELECT COUNT(*)
+            FROM Votes
+            WHERE server_id = ?
+              AND target_user_id = ?
+              AND score = ?
+        """, (
+            server_id,
+            target_user_id,
+            score
+        ))
+
+        return cursor.fetchone()[0]
+
+
+def get_top_voted_users(
+    server_id,
+    score,
+    limit
+):
+    with get_connection() as connection:
+        cursor = connection.execute("""
+            SELECT
+                target_user_id,
+                COUNT(*) AS vote_count
+            FROM Votes
+            WHERE server_id = ?
+              AND score = ?
+            GROUP BY target_user_id
+            ORDER BY vote_count DESC
+            LIMIT ?
+        """, (
+            server_id,
+            score,
+            limit
+        ))
+
+        return cursor.fetchall()
+    
+def set_leaderboard_message_id(server_id, message_id):
+    with get_connection() as connection:
+        connection.execute("""
+            UPDATE Servers
+            SET leaderboard_message_id = ?
+            WHERE server_id = ?
+        """, (message_id, server_id))
