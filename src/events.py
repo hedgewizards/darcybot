@@ -26,6 +26,9 @@ class Events(interactions.Extension):
         if guild_settings is None:
             return
 
+        if event.message.Id == event.message.author.id:
+            return
+
         received_emote = str(event.emoji)
         positive_emote = guild_settings["vote_positive_emote"]
         negative_emote = guild_settings["vote_negative_emote"]
