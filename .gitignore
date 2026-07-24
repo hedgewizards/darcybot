@@ -5,3 +5,6 @@ __pycache__/
 .env
 data
 .vscode
+.gitconfig
+.lesshst
+.ssh
