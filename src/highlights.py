@@ -7,10 +7,6 @@ async def process_positive_vote(bot, message, guild_settings):
         return
 
     if database.is_message_highlighted(message.id):
-        highlighted_message = database.get_highlighted_message(
-            message.id
-        )
-
         await process_any_vote(bot, message, guild_settings)
         return
 
