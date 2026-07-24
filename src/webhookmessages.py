@@ -39,7 +39,7 @@ async def send_webhook_message(
     print(
         f"Sending webhook message: "
         f"original_message={message.id}, " 
-        f"new_message={webhook_message["id"]}, "
+        f"new_message={webhook_message['id']}, "
         f"author={message.author.id}, "
         f"webhook_channel={channel.id}"
     )
