@@ -11,11 +11,15 @@ token = os.getenv("DARCY_TOKEN")
 debug_scope = os.getenv("DARCY_DEBUG_SCOPE")
 intents = interactions.Intents.DEFAULT | interactions.Intents.MESSAGE_CONTENT
 
-bot = interactions.Client(
-    token=token,
-    debug_scope=int(debug_scope) if debug_scope else None,
-    intents=intents
-)
+client_args = {
+    "token": token,
+    "intents": intents
+}
+
+if debug_scope:
+    client_args["debug_scope"] = int(debug_scope)
+
+bot = interactions.Client(**client_args)
 
 database.initialize()
 
