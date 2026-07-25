@@ -177,6 +177,47 @@ class Commands(Extension):
         await ctx.send(
             "Highlights channel cleared."
         )
+    
+    @slash_command(
+        name="check-score",
+        description="Check how many votes a user has received",
+        default_member_permissions=Permissions.SEND_MESSAGES
+    )
+
+    @slash_option(
+        name="user",
+        description="The user to check (check your own if empty)",
+        opt_type=OptionType.USER,
+        required=False
+    )
+    async def check_score(self, ctx, user=None):
+        guild_settings = database.get_server(ctx.guild_id)
+
+        if guild_settings is None:
+            return
+
+        user_id = user.id if user else ctx.author.id
+
+        positive_votes = database.get_user_vote_count(
+            ctx.guild_id,
+            user_id,
+            1
+        )
+
+        negative_votes = database.get_user_vote_count(
+            ctx.guild_id,
+            user_id,
+            -1
+        )
+
+        positive_emote = guild_settings["vote_positive_emote"]
+        negative_emote = guild_settings["vote_negative_emote"]
+
+        await ctx.send(
+            f"<@{user_id}>: "
+            f"{positive_emote} x{positive_votes} "
+            f"{negative_emote} x{negative_votes}"
+        )
 
 
 def format_channel(channel_id):
